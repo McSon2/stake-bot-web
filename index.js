@@ -7,8 +7,8 @@ import session from "express-session";
 import fs from "fs";
 import { Telegraf } from "telegraf";
 import webpush from "web-push";
-import { fetchTrackedUsersData } from "../BOTSQLite/src/database/query.js";
-import { updateTrackedUsersMap } from "../BOTSQLite/src/global.js";
+import { fetchTrackedUsersData } from "../Botsqlite/src/database/query.js";
+import { updateTrackedUsersMap } from "../Botsqlite/src/global.js";
 
 dotenv.config();
 
