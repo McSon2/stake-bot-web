@@ -1,5 +1,7 @@
 # Stake-Bot-Web
 
+![Landing Page](img/1.png "Landing Page")
+
 ## Introduction
 
 Ce projet est un système de suivi de paris pour stake.com, permettant aux utilisateurs de suivre les paris d'autres utilisateurs en temps réel, de voir les statistiques des parieurs, et bien plus encore. Il comprend une interface web et des notifications pour les mises à jour des paris.
