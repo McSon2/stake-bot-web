@@ -43,7 +43,7 @@ const app = express();
 const port = 3000;
 
 webpush.setVapidDetails(
-  "mailto:maximesaltet@gmail.com",
+  "mailto:process.env.MAIL",
   process.env.VAPID_PUBLIC_KEY,
   process.env.VAPID_PRIVATE_KEY
 );
