@@ -81,6 +81,10 @@ VAPID_PRIVATE_KEY=<Votre_Clé_Privée_VAPID>
 
 Remplacez `<Votre_Session_Secret_Généré>`, `<Votre_Clé_Publique_VAPID>`, et `<Votre_Clé_Privée_VAPID>` par les valeurs que vous avez générées.
 
+### Le BOT TELEGRAM
+
+Vous aurez aussi besoin de 2 bot telegram ainsi que 2 channel. Dans le .env de ce projet vous aurez besoin du BOT Autobet et du channel principal.
+
 ### Conclusion
 
 Après avoir configuré ces variables d'environnement, votre application est prête à utiliser les notifications push de manière sécurisée. Assurez-vous de ne jamais divulguer votre clé privée VAPID ou votre `SESSION_SECRET`.
