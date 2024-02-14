@@ -1,19 +1,19 @@
-import express from "express";
 import bodyParser from "body-parser";
-import session from "express-session";
-import dotenv from "dotenv";
 import cors from "cors";
-import fs from "fs";
 import csv from "csv-parser";
-import webpush from "web-push";
+import dotenv from "dotenv";
+import express from "express";
+import session from "express-session";
+import fs from "fs";
 import { Telegraf } from "telegraf";
+import webpush from "web-push";
 import { fetchTrackedUsersData } from "../BOTSQLite/src/database/query.js";
 import { updateTrackedUsersMap } from "../BOTSQLite/src/global.js";
 
 dotenv.config();
 
 let dbPromise;
-import("../BOTSQLite/src/database/connection.js")
+import("../Botsqlite/src/database/connection.js")
   .then((module) => {
     dbPromise = module.default;
   })
@@ -42,7 +42,11 @@ import("./dbsubscription2.js")
 const app = express();
 const port = 3000;
 
-webpush.setVapidDetails("mailto:maximesaltet@gmail.com", process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
+webpush.setVapidDetails(
+  "mailto:maximesaltet@gmail.com",
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 const csvFilePath = "../BOTSQLite/topUsersData.csv";
 
@@ -72,7 +76,10 @@ app.post("/api/subscribe", async (req, res) => {
   try {
     const db = await dbSubscription;
     // Vérifier si l'abonnement existe déjà
-    const existingSubscription = await db.get("SELECT id FROM push_subscriptions WHERE endpoint = ?", endpoint);
+    const existingSubscription = await db.get(
+      "SELECT id FROM push_subscriptions WHERE endpoint = ?",
+      endpoint
+    );
 
     if (!existingSubscription) {
       await db.run(
@@ -85,7 +92,9 @@ app.post("/api/subscribe", async (req, res) => {
     }
   } catch (error) {
     console.error("Erreur lors de l'enregistrement de l'abonnement:", error);
-    res.status(500).json({ message: "Erreur lors de l'enregistrement de l'abonnement." });
+    res
+      .status(500)
+      .json({ message: "Erreur lors de l'enregistrement de l'abonnement." });
   }
 });
 
@@ -94,22 +103,29 @@ app.post("/api/authentifier-telegram", async (req, res) => {
 
   const isSubscribed = await checkSubscription(telegramId);
   if (!isSubscribed) {
-    return res
-      .status(403)
-      .send({ message: "Veuillez vous abonner au channel VIP", subscribeUrl: "https://t.me/OxaPayCHGBot?start=qVWWsGw" });
+    return res.status(403).send({
+      message: "Veuillez vous abonner au channel VIP",
+      subscribeUrl: "https://t.me/OxaPayCHGBot?start=qVWWsGw",
+    });
   }
 
   // Vérification de l'utilisateur dans la base de données
   try {
     const db = await dbPromise;
-    const rows = await db.all("SELECT * FROM apikey WHERE telegram_id = ?", telegramId);
+    const rows = await db.all(
+      "SELECT * FROM apikey WHERE telegram_id = ?",
+      telegramId
+    );
 
     if (rows.length > 0) {
       req.session.telegramId = telegramId;
       res.send({ message: "Authentification réussie" });
     } else {
       // L'utilisateur doit fournir sa clé API et son nom d'utilisateur Stake
-      res.status(401).send({ message: "Veuillez fournir votre clé API et votre nom d'utilisateur Stake" });
+      res.status(401).send({
+        message:
+          "Veuillez fournir votre clé API et votre nom d'utilisateur Stake",
+      });
     }
   } catch (error) {
     console.error("Erreur de connexion à la base de données:", error);
@@ -140,17 +156,19 @@ app.post("/api/enregistrer-utilisateur", async (req, res) => {
 
   try {
     const db = await dbPromise;
-    const userExists = await db.get("SELECT * FROM apikey WHERE telegram_id = ?", telegramId);
+    const userExists = await db.get(
+      "SELECT * FROM apikey WHERE telegram_id = ?",
+      telegramId
+    );
 
     if (userExists) {
       return res.status(409).send({ message: "Utilisateur déjà enregistré" });
     }
 
-    await db.run("INSERT INTO apikey (telegram_id, api_key, stake_username) VALUES (?, ?, ?)", [
-      telegramId,
-      apiKey,
-      stakeUsername,
-    ]);
+    await db.run(
+      "INSERT INTO apikey (telegram_id, api_key, stake_username) VALUES (?, ?, ?)",
+      [telegramId, apiKey, stakeUsername]
+    );
     res.send({ message: "Enregistrement réussi" });
   } catch (error) {
     console.error("Erreur de connexion à la base de données:", error);
@@ -162,7 +180,9 @@ app.post("/api/logout", function (req, res) {
   req.session.destroy(function (err) {
     if (err) {
       console.error("Erreur de déconnexion:", err);
-      res.status(500).send({ message: "Erreur du serveur lors de la déconnexion" });
+      res
+        .status(500)
+        .send({ message: "Erreur du serveur lors de la déconnexion" });
     } else {
       res.send({ message: "Déconnexion réussie" });
     }
@@ -194,7 +214,10 @@ app.get("/api/user-stats", async (req, res) => {
 
   try {
     const db = await dbPromise;
-    const userRows = await db.all("SELECT stake_username FROM apikey WHERE telegram_id = ?", req.session.telegramId);
+    const userRows = await db.all(
+      "SELECT stake_username FROM apikey WHERE telegram_id = ?",
+      req.session.telegramId
+    );
 
     if (userRows.length > 0) {
       const stake_username = userRows[0].stake_username;
@@ -241,7 +264,10 @@ app.get("/api/followed-users", async (req, res) => {
   try {
     const db = await dbPromise;
     const telegramId = req.session.telegramId;
-    const followedUsers = await db.all("SELECT followed_username FROM user_tracking WHERE telegram_id = ?", telegramId);
+    const followedUsers = await db.all(
+      "SELECT followed_username FROM user_tracking WHERE telegram_id = ?",
+      telegramId
+    );
     res.send(followedUsers);
   } catch (error) {
     console.error("Erreur:", error);
@@ -276,7 +302,9 @@ app.get("/api/user-stats/:username", async (req, res) => {
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", async () => {
-      const userCsvData = results.find((user) => user.USER.toLowerCase() === username.toLowerCase());
+      const userCsvData = results.find(
+        (user) => user.USER.toLowerCase() === username.toLowerCase()
+      );
 
       if (userCsvData) {
         const formattedData = formatCsvDataToStats(userCsvData);
@@ -313,10 +341,16 @@ app.get("/api/user-stats/:username", async (req, res) => {
           if (stats.length) {
             res.json(stats[0]);
           } else {
-            res.status(404).send({ message: "Statistiques non trouvées pour l'utilisateur : " + username });
+            res.status(404).send({
+              message:
+                "Statistiques non trouvées pour l'utilisateur : " + username,
+            });
           }
         } catch (error) {
-          console.error("Erreur lors de la récupération des statistiques de l'utilisateur :", error);
+          console.error(
+            "Erreur lors de la récupération des statistiques de l'utilisateur :",
+            error
+          );
           res.status(500).send({ message: "Erreur du serveur" });
         }
       }
@@ -334,10 +368,10 @@ app.get("/api/autobet-settings/:username", async (req, res) => {
     const db = await dbPromise;
 
     const telegramId = req.session.telegramId;
-    const settings = await db.all("SELECT * FROM user_tracking WHERE telegram_id = ? AND followed_username = ?", [
-      telegramId,
-      username,
-    ]);
+    const settings = await db.all(
+      "SELECT * FROM user_tracking WHERE telegram_id = ? AND followed_username = ?",
+      [telegramId, username]
+    );
 
     if (settings.length) {
       res.json({
@@ -348,10 +382,16 @@ app.get("/api/autobet-settings/:username", async (req, res) => {
         currency: settings[0].currency,
       });
     } else {
-      res.status(404).send({ message: "Paramètres d'autobet non trouvés pour l'utilisateur : " + username });
+      res.status(404).send({
+        message:
+          "Paramètres d'autobet non trouvés pour l'utilisateur : " + username,
+      });
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération des paramètres d'autobet de l'utilisateur :", error);
+    console.error(
+      "Erreur lors de la récupération des paramètres d'autobet de l'utilisateur :",
+      error
+    );
     res.status(500).send({ message: "Erreur du serveur" });
   }
 });
@@ -366,7 +406,10 @@ app.delete("/api/unfollow-user/:username", async (req, res) => {
 
     const telegramId = req.session.telegramId;
     const username = req.params.username;
-    await db.run("DELETE FROM user_tracking WHERE followed_username = ? AND telegram_id = ?", [username, telegramId]);
+    await db.run(
+      "DELETE FROM user_tracking WHERE followed_username = ? AND telegram_id = ?",
+      [username, telegramId]
+    );
     await updateTrackedUsersData();
     res.send({ message: "Utilisateur supprimé avec succès" });
   } catch (error) {
@@ -377,7 +420,13 @@ app.delete("/api/unfollow-user/:username", async (req, res) => {
 
 app.post("/api/update-autobet-settings/:username", async (req, res) => {
   const username = req.params.username;
-  const { bet_amount, variable_bet, max_bet_amount, currency, auto_bet_active } = req.body;
+  const {
+    bet_amount,
+    variable_bet,
+    max_bet_amount,
+    currency,
+    auto_bet_active,
+  } = req.body;
 
   try {
     const db = await dbPromise;
@@ -385,18 +434,36 @@ app.post("/api/update-autobet-settings/:username", async (req, res) => {
     const telegramId = req.session.telegramId;
     const updateResponse = await db.run(
       "UPDATE user_tracking SET bet_amount = ?, variable_bet = ?, max_bet_amount = ?, currency = ?, auto_bet_active = ? WHERE telegram_id = ? AND followed_username = ?",
-      [bet_amount, variable_bet, max_bet_amount, currency, auto_bet_active, telegramId, username]
+      [
+        bet_amount,
+        variable_bet,
+        max_bet_amount,
+        currency,
+        auto_bet_active,
+        telegramId,
+        username,
+      ]
     );
 
     if (updateResponse.changes > 0) {
       await updateTrackedUsersData();
-      res.send({ message: "Paramètres d'autobet mis à jour avec succès pour l'utilisateur : " + username });
+      res.send({
+        message:
+          "Paramètres d'autobet mis à jour avec succès pour l'utilisateur : " +
+          username,
+      });
     } else {
       await updateTrackedUsersData();
-      res.status(404).send({ message: "Aucune mise à jour effectuée pour l'utilisateur : " + username });
+      res.status(404).send({
+        message:
+          "Aucune mise à jour effectuée pour l'utilisateur : " + username,
+      });
     }
   } catch (error) {
-    console.error("Erreur lors de la mise à jour des paramètres d'autobet de l'utilisateur :", error);
+    console.error(
+      "Erreur lors de la mise à jour des paramètres d'autobet de l'utilisateur :",
+      error
+    );
     res.status(500).send({ message: "Erreur du serveur" });
   }
 });
@@ -409,10 +476,10 @@ app.post("/api/follow-user/:username", async (req, res) => {
     const username = req.params.username;
 
     // Vérifiez si l'utilisateur est déjà suivi
-    const existingUser = await db.get("SELECT * FROM user_tracking WHERE telegram_id = ? AND followed_username = ?", [
-      telegramId,
-      username,
-    ]);
+    const existingUser = await db.get(
+      "SELECT * FROM user_tracking WHERE telegram_id = ? AND followed_username = ?",
+      [telegramId, username]
+    );
 
     if (!existingUser) {
       // Si l'utilisateur n'est pas déjà suivi, insérez la nouvelle ligne
@@ -470,10 +537,17 @@ app.get("/api/user-daily-stats/:username", async (req, res) => {
     if (dailyStats.length) {
       res.json(dailyStats);
     } else {
-      res.status(404).send({ message: "Statistiques quotidiennes non trouvées pour l'utilisateur : " + username });
+      res.status(404).send({
+        message:
+          "Statistiques quotidiennes non trouvées pour l'utilisateur : " +
+          username,
+      });
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération des statistiques quotidiennes de l'utilisateur :", error);
+    console.error(
+      "Erreur lors de la récupération des statistiques quotidiennes de l'utilisateur :",
+      error
+    );
     res.status(500).send({ message: "Erreur du serveur" });
   }
 });
@@ -488,7 +562,10 @@ app.post("/api/change-api-key", async (req, res) => {
 
   try {
     const db = await dbPromise;
-    await db.run("UPDATE apikey SET api_key = ? WHERE telegram_id = ?", [newApiKey, telegramId]);
+    await db.run("UPDATE apikey SET api_key = ? WHERE telegram_id = ?", [
+      newApiKey,
+      telegramId,
+    ]);
     res.send({ message: "Clé API modifiée avec succès" });
   } catch (error) {
     console.error("Erreur de connexion à la base de données:", error);
@@ -550,7 +627,10 @@ app.get("/api/user-stats-graph", async (req, res) => {
     );
 
     for (let record of bettingRecords) {
-      const statusResult = await db.get(`SELECT status FROM sports_bets WHERE iid = ?`, [record.iid]);
+      const statusResult = await db.get(
+        `SELECT status FROM sports_bets WHERE iid = ?`,
+        [record.iid]
+      );
       record.status = statusResult ? statusResult.status : null;
     }
 
@@ -565,7 +645,9 @@ app.get("/api/user-stats-graph", async (req, res) => {
 
     const dailyStats = Object.keys(statsByDate)
       .map((date) => {
-        const records = statsByDate[date].filter((record) => record.status && record.status !== "pending");
+        const records = statsByDate[date].filter(
+          (record) => record.status && record.status !== "pending"
+        );
 
         if (records.length === 0) {
           // Si aucun enregistrement valide pour cette date, ne pas inclure dans les stats
@@ -573,15 +655,29 @@ app.get("/api/user-stats-graph", async (req, res) => {
         }
 
         const dailyProfit = records.reduce((sum, record) => {
-          return sum + (record.status === "won" ? record.amount * record.odds - record.amount : -record.amount);
+          return (
+            sum +
+            (record.status === "won"
+              ? record.amount * record.odds - record.amount
+              : -record.amount)
+          );
         }, 0);
-        const maxBetAmount = Math.max(...records.map((record) => record.amount));
-        const totalBetAmount = records.reduce((sum, record) => sum + record.amount, 0);
-        const dailyROI = totalBetAmount > 0 ? (dailyProfit / totalBetAmount) * 100 : 0;
+        const maxBetAmount = Math.max(
+          ...records.map((record) => record.amount)
+        );
+        const totalBetAmount = records.reduce(
+          (sum, record) => sum + record.amount,
+          0
+        );
+        const dailyROI =
+          totalBetAmount > 0 ? (dailyProfit / totalBetAmount) * 100 : 0;
 
         cumulativeProfit += dailyProfit;
         cumulativeBetAmount += totalBetAmount;
-        const cumulativeROI = cumulativeBetAmount > 0 ? (cumulativeProfit / cumulativeBetAmount) * 100 : 0;
+        const cumulativeROI =
+          cumulativeBetAmount > 0
+            ? (cumulativeProfit / cumulativeBetAmount) * 100
+            : 0;
 
         return {
           date,
@@ -600,7 +696,10 @@ app.get("/api/user-stats-graph", async (req, res) => {
       res.status(404).send({ message: "Autobet statistics not found" });
     }
   } catch (error) {
-    console.error("Erreur lors de la récupération des statistiques quotidiennes :", error);
+    console.error(
+      "Erreur lors de la récupération des statistiques quotidiennes :",
+      error
+    );
     res.status(500).send({ message: "Erreur du serveur" });
   }
 });
@@ -615,12 +714,20 @@ app.delete("/api/delete-all-stats", async (req, res) => {
     const telegramId = req.session.telegramId;
 
     // Trouver le stake_username correspondant au telegram_id
-    const apiKeyResult = await db.get("SELECT stake_username FROM apikey WHERE telegram_id = ?", telegramId);
+    const apiKeyResult = await db.get(
+      "SELECT stake_username FROM apikey WHERE telegram_id = ?",
+      telegramId
+    );
 
     if (apiKeyResult && apiKeyResult.stake_username) {
       // Supprimer les enregistrements dans sports_bets
-      await db.run("DELETE FROM sports_bets WHERE user = ?", apiKeyResult.stake_username);
-      res.send({ message: "Toutes les statistiques ont été supprimées avec succès" });
+      await db.run(
+        "DELETE FROM sports_bets WHERE user = ?",
+        apiKeyResult.stake_username
+      );
+      res.send({
+        message: "Toutes les statistiques ont été supprimées avec succès",
+      });
     } else {
       res.status(404).send({ message: "Utilisateur non trouvé" });
     }
@@ -639,8 +746,13 @@ app.delete("/api/delete-autobet-stats", async (req, res) => {
     const db2 = await dbUserstats;
     const telegramId = req.session.telegramId;
 
-    await db2.run("DELETE FROM betting_records WHERE telegram_id = ?", telegramId);
-    res.send({ message: "Les statistiques de l'autobet ont été supprimées avec succès" });
+    await db2.run(
+      "DELETE FROM betting_records WHERE telegram_id = ?",
+      telegramId
+    );
+    res.send({
+      message: "Les statistiques de l'autobet ont été supprimées avec succès",
+    });
   } catch (error) {
     console.error("Erreur:", error);
     res.status(500).send({ message: "Erreur du serveur" });
