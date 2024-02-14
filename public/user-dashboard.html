@@ -1,0 +1,2039 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="ios.png" />
+    <meta name="apple-mobile-web-app-title" content="Stake Sport Bot" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="icon" href="web.ico" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <script src="https://kit.fontawesome.com/a78097c9a9.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+
+    <title>User Dashboard</title>
+    <style>
+      body,
+      html {
+        height: 100vh;
+        margin: 0;
+        font-family: "Open Sans", sans-serif;
+        background: linear-gradient(225deg, #032127 0%, #3f3251 100%);
+        color: #ecf0f1;
+        background-attachment: fixed;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      h2 {
+        margin: 0;
+        padding-right: 20px;
+      }
+
+      h2#username {
+        margin-right: -30px;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+      }
+
+      #search {
+        position: absolute;
+        margin-left: auto;
+        right: 10px;
+        top: 65px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      #search-icon,
+      #setting-icon {
+        cursor: pointer;
+        color: white;
+        font-size: 1.5em;
+        padding: 5px;
+      }
+
+      #search-bar {
+        position: absolute;
+        top: 60px;
+        right: 60px;
+        display: flex;
+        align-items: center;
+        padding: 5px;
+        background: #09232b;
+        border-radius: 10px 10px 0 0;
+      }
+
+      #user-search {
+        border: none;
+        padding: 10px;
+        width: 280px;
+        background: #f9f9f9;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        top: 45px;
+        left: 0;
+        right: 0;
+        background-color: #09232b;
+        min-width: 240px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 10px 10px;
+        overflow: hidden;
+        z-index: 2;
+      }
+
+      .dropdown-item {
+        color: white;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        cursor: pointer;
+      }
+
+      /* Hide the dropdown when not in use */
+      #search-bar:not(:focus-within) .dropdown-content {
+        display: none;
+      }
+
+      .notification-container {
+        position: fixed;
+        top: -50px;
+        right: 20px;
+        background-color: #5cb85c;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        display: none;
+        z-index: 1000;
+      }
+
+      .notification-container.active {
+        display: block;
+        animation: slideInOut 3s forwards;
+      }
+
+      .user-container {
+        flex-shrink: 0; /* Empêcher la réduction */
+        flex-grow: 0; /* Empêcher l'agrandissement */
+        margin-right: 5px;
+      }
+
+      .stats-container {
+        overflow: hidden;
+        flex-grow: 1;
+        margin: 0 20px;
+        width: calc(100% - 40px);
+      }
+
+      .stats-scroll,
+      .stats-scroll2,
+      .stats-scroll3,
+      .stats-scroll4 {
+        display: flex;
+        margin: 0 auto;
+        white-space: nowrap;
+        overflow: hidden;
+        position: absolute;
+        margin-top: -8px;
+        width: calc(100% - 220px);
+      }
+
+      .stats-scroll span {
+        display: flex;
+        animation: scrolltextstart 10s linear infinite;
+      }
+
+      .stats-scroll2 span {
+        display: flex;
+        animation: scrolltextmid 10s linear infinite;
+      }
+
+      .stats-scroll3 span {
+        display: flex;
+        animation: scrolltextmid1 10s linear infinite;
+      }
+
+      .stats-scroll4 span {
+        display: flex;
+        animation: scrolltextend 10s linear infinite;
+      }
+
+      .divlogout-btn {
+        padding-left: 20px;
+        z-index: 2;
+      }
+
+      .logout-btn {
+        padding: 5px 15px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: auto;
+        margin-top: 5px;
+      }
+
+      .logout-btn:hover {
+        background: #c0392b;
+      }
+
+      .container {
+        width: 340px;
+        margin: auto;
+        text-align: center;
+        padding-top: 50px;
+      }
+
+      .stat-item {
+        margin: 0 10px;
+        display: block;
+      }
+
+      header,
+      .stat-item,
+      .logout-btn {
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+      }
+
+      #followedUsers {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0 120px;
+      }
+
+      #top20Users {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0 120px;
+      }
+
+      .user-box {
+        position: relative;
+        border: 1px solid #fff;
+        margin: 10px;
+        padding: 10px;
+        display: inline-block;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border-radius: 5px;
+        flex: 1;
+        flex-basis: calc(15% + 100px);
+      }
+
+      .fullscreen-user-box {
+        position: static;
+        flex-basis: 100%;
+        width: 100%;
+        height: auto;
+        z-index: 10;
+      }
+
+      .topbot {
+        display: flex;
+        justify-content: center;
+        position: relative;
+      }
+
+      .username {
+        text-align: center;
+        display: block;
+        z-index: 1;
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        background-color: #ff7675;
+        color: white;
+        border: none;
+        border-radius: 20%;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s;
+      }
+
+      .delete-btn:hover {
+        background-color: #d63031;
+      }
+
+      .user-box .user-stats-container {
+        display: none;
+      }
+
+      .user-box .autobet-settings-container {
+        display: none;
+      }
+
+      .user-stats-container {
+        background-color: rgba(255, 255, 255, 0.05);
+        margin-top: 10px;
+        padding: 5px;
+        border-radius: 5px;
+      }
+
+      .autobet-settings-container {
+        background-color: rgba(255, 255, 255, 0.05);
+        margin-top: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        position: relative;
+      }
+
+      .toggle-fullscreen-button {
+        background-color: rgba(255, 255, 255, 0.5); /* Léger fond blanc transparent */
+        border: none;
+        border-radius: 50%; /* Rend le bouton rond */
+        width: 20px; /* Largeur du bouton */
+        height: 20px; /* Hauteur du bouton */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Ombre légère pour le relief */
+        position: absolute; /* Positionnement absolu par rapport à son parent relatif */
+        bottom: 10px; /* Distance du haut */
+        right: 10px; /* Distance de la droite */
+      }
+
+      .toggle-fullscreen-button i {
+        color: #333; /* Couleur de l'icône */
+        font-size: 0.8em; /* Taille de l'icône */
+      }
+
+      .user-box .username {
+        text-align: center;
+        display: block;
+      }
+
+      .button-container button {
+        padding: 5px 10px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        width: 80px;
+        height: 30px;
+        align-self: center;
+        color: #444444;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s;
+      }
+
+      .user-box button.stats-btn {
+        background-color: #5dade2;
+      }
+
+      .user-box button.stats-btn:hover {
+        background-color: #3498db;
+      }
+
+      .user-box button.autobet-btn {
+        background-color: #58d68d;
+      }
+
+      .user-box button.autobet-btn:hover {
+        background-color: #52b77e;
+      }
+
+      .user-box button.edit-autobet-btn {
+        background-color: #f5b041;
+      }
+
+      .user-box button.edit-autobet-btn:hover {
+        background-color: #f39c12;
+      }
+
+      .user-box button.edit-autobet-btn i {
+        font-size: 17px;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .stats-container:hover .stats-scroll span,
+      .stats-container:hover .stats-scroll2 span,
+      .stats-container:hover .stats-scroll3 span,
+      .stats-container:hover .stats-scroll4 span {
+        animation-play-state: paused;
+      }
+
+      #autobetForm {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: #ecf0f1;
+        border: 1px solid #fff;
+        max-width: 400px;
+        margin: 20px auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #autobetForm label {
+        display: block;
+        margin-bottom: 5px;
+        color: #ecf0f1;
+      }
+
+      #autobetForm .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      #autobetForm .checkbox-group label {
+        margin-right: 10px;
+        flex-shrink: 0;
+      }
+
+      #autobetForm input[type="checkbox"] {
+        margin-right: 90px;
+        align-self: center;
+        margin-top: 6px;
+      }
+
+      #autobetForm input[type="text"],
+      #autobetForm input[type="checkbox"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background: #3a3a3a;
+        color: #ecf0f1;
+        border: 1px solid #5dade2;
+      }
+
+      #autobetForm button {
+        padding: 5px 70px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        background-color: #5dade2;
+        color: #ececec;
+        transition: background-color 0.3s;
+        align-self: center;
+      }
+
+      #autobetForm button span {
+        white-space: nowrap;
+      }
+
+      #autobetForm input[type="text"],
+      #autobetForm input[type="checkbox"],
+      #autobetForm button {
+        box-sizing: border-box;
+      }
+
+      #autobetForm button:hover {
+        background-color: #3498db;
+      }
+
+      #autobetForm select {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background: #3a3a3a;
+        color: #ecf0f1;
+        border: 1px solid #5dade2;
+        -webkit-appearance: none; /* Removes default styling for select in WebKit browsers */
+        -moz-appearance: none; /* Removes default styling for select in Mozilla browsers */
+        appearance: none; /* Removes default styling for select in standard browsers */
+      }
+
+      /* To style the dropdown arrow */
+      #autobetForm select::-ms-expand {
+        display: none; /* For IE11 */
+      }
+
+      /* Add custom arrow */
+      #autobetForm select {
+        background-position: right 10px top 50%; /* Adjust as needed */
+        background-repeat: no-repeat;
+        background-size: 15px; /* Adjust as needed */
+      }
+
+      .loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      .loader {
+        border: 5px solid #f3f3f3; /* Light grey */
+        border-top: 5px solid #5dade2; /* Blue */
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 2s linear infinite;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      .modal-content {
+        background-color: #3a3a3a;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        display: flex; /* Utilisez flexbox pour centrer le contenu */
+        flex-direction: column; /* Les enfants s'empilent verticalement */
+        align-items: center;
+      }
+
+      .close-btn {
+        color: #ff7675;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        margin-top: -25px;
+        margin-right: -510px;
+      }
+
+      .close-btn:hover,
+      .close-btn:focus {
+        color: #d63031;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      /* Style the buttons */
+      .modal button {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+      }
+
+      #confirmYes,
+      #deleteAllStats,
+      #deleteAutobetStats {
+        background-color: #ff7675;
+      }
+
+      #confirmYes:hover,
+      #deleteAllStats:hover,
+      #deleteAutobetStats:hover {
+        background-color: #d63031;
+      }
+
+      .fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 80%;
+        height: 80%;
+        z-index: 1000;
+        background-color: white;
+      }
+
+      .custom-input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background: #3a3a3a;
+        color: #ecf0f1;
+        border: 1px solid #5dade2;
+      }
+
+      .custom-input::placeholder {
+        color: #ecf0f1;
+      }
+
+      .custom-input:focus {
+        outline: none;
+        border-color: #3498db;
+        background: #2c3e50;
+      }
+
+      #notification-modal {
+        display: none;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      #notification-modal .modal-content {
+        background-color: #3a3a3a;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+      }
+
+      #notification-modal button {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      #modal-yes {
+        background-color: #58d68d;
+      }
+
+      #modal-yes:hover {
+        background-color: #52b77e;
+      }
+
+      #modal-no {
+        background-color: #ff7675;
+      }
+
+      #modal-no:hover {
+        background-color: #d63031;
+      }
+
+      @keyframes slideInOut {
+        0%,
+        100% {
+          top: -50px;
+          opacity: 0;
+        }
+        10%,
+        90% {
+          top: 20px;
+          opacity: 1;
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 600px) {
+        #autobetForm {
+          padding: 10px;
+          max-width: 95%;
+        }
+      }
+
+      @keyframes scrolltextstart {
+        from {
+          transform: translateX(0%);
+        }
+        to {
+          transform: translateX(-100%);
+        }
+      }
+
+      @keyframes scrolltextmid {
+        from {
+          transform: translateX(100%);
+        }
+        to {
+          transform: translateX(0%);
+        }
+      }
+
+      @keyframes scrolltextmid1 {
+        from {
+          transform: translateX(200%);
+        }
+        to {
+          transform: translateX(100%);
+        }
+      }
+
+      @keyframes scrolltextend {
+        from {
+          transform: translateX(300%);
+        }
+        to {
+          transform: translateX(200%);
+        }
+      }
+
+      @media (max-width: 850px) {
+        #followedUsers {
+          padding: 0 20px;
+        }
+        #top20Users {
+          padding: 0 20px;
+        }
+      }
+
+      @media (max-width: 1000px) {
+        .statsContent-content {
+          overflow-x: auto;
+          overflow-y: auto;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .modal-content {
+          margin: 10% auto; /* Adjust the margin as needed for smaller screens */
+        }
+
+        .close-btn {
+          right: 560px;
+          margin-top: -25px;
+        }
+      }
+
+      @media (max-width: 450px) {
+        .user-box {
+          flex-basis: calc(100% - 20px);
+        }
+
+        .stats-scroll span {
+          display: flex;
+          animation: scrolltextstart 15s linear infinite;
+        }
+
+        .stats-scroll2 span {
+          display: flex;
+          animation: scrolltextmid 15s linear infinite;
+        }
+
+        .stats-scroll3 span {
+          display: flex;
+          animation: scrolltextmid1 15s linear infinite;
+        }
+
+        .stats-scroll4 span {
+          display: flex;
+          animation: scrolltextend 15s linear infinite;
+        }
+
+        .close-btn {
+          right: 545px;
+        }
+      }
+
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+      }
+
+      .toggle-buttons {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .toggle-buttons button {
+        padding: 15px 30px; /* Augmentation de la taille pour un aspect plus prononcé */
+        margin: 10px;
+        border: none; /* Suppression des bordures pour un look plus propre */
+        border-radius: 15px; /* Augmentation du rayon pour des coins plus arrondis */
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 18px; /* Augmentation de la taille de police pour plus de lisibilité */
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.3); /* Fond plus opaque pour un effet plus prononcé */
+        backdrop-filter: blur(15px); /* Augmentation du flou pour un effet de verre plus net */
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Ombre plus grande et plus douce */
+        transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .toggle-buttons button.active,
+      .toggle-buttons button:hover {
+        transform: translateY(-3px); /* Légère élévation pour un effet de survol plus dynamique */
+        background: rgba(255, 255, 255, 0.4); /* Fond légèrement plus opaque au survol */
+        box-shadow: 0 12px 16px rgba(0, 0, 0, 0.25); /* Ombre plus grande et plus intense au survol */
+      }
+
+      #statsContent {
+        align-items: start;
+        height: 75vh;
+        margin-top: 20px;
+      }
+
+      .statsContent-buttons {
+        flex-basis: 10%; /* Ajustez selon les besoins */
+        padding: 10px;
+        display: flex;
+        flex-direction: column; /* Pour aligner les boutons verticalement */
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+
+      .statsContent-content {
+        flex-basis: 85%;
+        padding: 10px;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+
+      .statsContent-buttons button {
+        padding: 30px 40px;
+        margin: 10px 0; /* Espace entre les boutons */
+        font-size: 16px;
+        border-radius: 10px;
+        border: none;
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .statsContent-buttons button:hover {
+        background: rgba(255, 255, 255, 0.4);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      input.gridjs-input {
+        background-color: transparent;
+        color: white;
+      }
+
+      .gridjs-search-input::placeholder {
+        color: white; /* Remplacez cette couleur par celle que vous souhaitez */
+        opacity: 1; /* Assurez-vous que l'opacité est définie pour que la couleur soit bien visible */
+      }
+
+      .gridjs-footer {
+        background-color: transparent;
+        box-shadow: none;
+      }
+
+      .gridjs-pagination {
+        display: flex;
+        justify-content: center; /* Centre horizontalement les éléments enfants */
+        align-items: center; /* Centre verticalement les éléments enfants */
+      }
+
+      .statsContent-content a {
+        color: #ecf0f1; /* Couleur du lien */
+        text-decoration: none; /* Pas de soulignement */
+      }
+
+      .statsContent-content a:hover {
+        text-decoration: underline; /* Souligner au survol */
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div id="notificationContainer" class="notification-container"></div>
+      <div class="user-container">
+        <h2 id="username">Loading...</h2>
+      </div>
+      <div class="stats-container">
+        <div class="stats-scroll" id="userStats"></div>
+        <div class="stats-scroll2" id="userStats2"></div>
+        <div class="stats-scroll3" id="userStats3"></div>
+        <div class="stats-scroll4" id="userStats4"></div>
+      </div>
+      <div class="divlogout-btn">
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="toggle-buttons">
+      <button id="homeBtn"><i class="fa-solid fa-house"></i></button>
+      <button id="statsBtn"><i class="fa-solid fa-table"></i></button>
+    </div>
+
+    <div id="homeContent">
+      <!-- Magnifying glass icon that triggers the search bar -->
+      <div id="search">
+        <span id="search-icon" onclick="toggleSearchBar()"><i class="fas fa-search"></i></span>
+        <span id="setting-icon" onclick="showEditApiKeyModal()"><i class="fa-solid fa-gear"></i></span>
+      </div>
+
+      <!-- Hidden search bar -->
+      <div id="search-bar" style="display: none">
+        <input type="text" id="user-search" oninput="searchUser(event.target.value)" placeholder="Search users..." />
+        <div id="search-results" class="dropdown-content"></div>
+      </div>
+
+      <h1>My followedUsers</h1>
+      <div id="followedUsers"></div>
+      <h1>TOP 20</h1>
+      <div id="top20Users"></div>
+    </div>
+
+    <div id="statsContent" style="display: none">
+      <div class="statsContent-buttons">
+        <button id="tableBtn"><i class="fa-solid fa-table"></i></button>
+        <button id="chartBtn"><i class="fa-solid fa-chart-simple"></i></button>
+        <button id="deleteBtn"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      <div id="statsTable" class="statsContent-content"></div>
+      <div id="chartContainer" class="statsContent-content" style="display: none"></div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <p>Choose the delete action:</p>
+        <button id="deleteAllStats">Delete all statistics</button>
+        <button id="deleteAutobetStats">Delete autobet statistics</button>
+      </div>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <p>Do you really want to stop following this user?</p>
+        <button id="confirmYes" onclick="confirmYes()">Oui</button>
+      </div>
+    </div>
+    <div id="notification-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <p>Would you like to activate notifications?</p>
+        <div class="button-container">
+          <button id="modal-yes">Oui</button>
+          <button id="modal-no">Non</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let followedUserStatsCache = {};
+      let chartData = null;
+      let chartInstances = {};
+
+      function adjustStatsScrollWidth() {
+        const usernameWidth = document.getElementById("username").offsetWidth;
+        const statsElements = document.querySelectorAll(".stats-scroll, .stats-scroll2, .stats-scroll3, .stats-scroll4");
+
+        statsElements.forEach((element) => {
+          element.style.width = `calc(100% - ${usernameWidth + 120}px)`;
+        });
+      }
+
+      document.getElementById("deleteBtn").addEventListener("click", function () {
+        document.getElementById("deleteModal").style.display = "block";
+      });
+
+      // Lorsque l'utilisateur clique sur (x), fermer la modale
+      document.querySelector(".close-btn").addEventListener("click", function () {
+        document.getElementById("deleteModal").style.display = "none";
+      });
+
+      // Lorsque l'utilisateur clique en dehors de la modale, fermer la modale
+      window.onclick = function (event) {
+        if (event.target == document.getElementById("deleteModal")) {
+          document.getElementById("deleteModal").style.display = "none";
+        }
+      };
+
+      // Ajouter des écouteurs d'événements pour les boutons de suppression
+      document.getElementById("deleteAllStats").addEventListener("click", function () {
+        if (confirm("Are you sure you want to do away with all statistics?")) {
+          deleteAllStats();
+          document.getElementById("deleteModal").style.display = "none";
+        }
+      });
+
+      document.getElementById("deleteAutobetStats").addEventListener("click", function () {
+        if (confirm("Are you sure you want to delete autobet statistics?")) {
+          deleteAutobetStats();
+          document.getElementById("deleteModal").style.display = "none";
+        }
+      });
+
+      function deleteAllStats() {
+        fetch("/api/delete-all-stats", {
+          method: "DELETE",
+          credentials: "include", // Assurez-vous d'inclure les credentials pour les sessions
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("La suppression a échoué");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            showNotification("All statistics have been successfully deleted.");
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la suppression:", error);
+          });
+      }
+
+      function deleteAutobetStats() {
+        fetch("/api/delete-autobet-stats", {
+          method: "DELETE",
+          credentials: "include",
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("La suppression a échoué");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            showNotification("The autobet statistics have been successfully deleted.");
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la suppression:", error);
+          });
+      }
+
+      function updateActiveButton(activeButtonId) {
+        document.querySelectorAll(".toggle-buttons button").forEach((button) => {
+          button.classList.remove("active");
+        });
+        document.getElementById(activeButtonId).classList.add("active");
+      }
+
+      updateActiveButton("homeBtn");
+
+      document.getElementById("homeBtn").addEventListener("click", function () {
+        document.getElementById("homeContent").style.display = "block";
+        document.getElementById("statsContent").style.display = "none";
+        updateActiveButton("homeBtn");
+      });
+
+      document.getElementById("statsBtn").addEventListener("click", function () {
+        document.getElementById("homeContent").style.display = "none";
+        document.getElementById("statsContent").style.display = "flex";
+        statsTable.innerHTML = "";
+        fetchUserStatsTable();
+        updateActiveButton("statsBtn");
+      });
+
+      document.getElementById("tableBtn").addEventListener("click", function () {
+        var statsTable = document.getElementById("statsTable");
+        var chartContainer = document.getElementById("chartContainer");
+
+        // Basculer la visibilité au lieu de réinitialiser et recréer
+        statsTable.style.display = "block";
+        if (chartContainer) {
+          chartContainer.style.display = "none";
+        }
+
+        // Vérifier si le tableau a déjà été créé
+        if (!statsTable.dataset.initialized) {
+          fetchUserStatsTable();
+          statsTable.dataset.initialized = "true"; // Marquer comme initialisé
+        }
+      });
+
+      document.getElementById("chartBtn").addEventListener("click", function () {
+        document.getElementById("statsTable").style.display = "none";
+        var chartContainer = document.getElementById("chartContainer");
+
+        if (chartContainer) {
+          chartContainer.style.display = "block";
+        }
+
+        let chartCanvas = chartContainer.querySelector("canvas");
+        if (!chartCanvas) {
+          chartCanvas = document.createElement("canvas");
+          chartCanvas.className = "chartuserstats";
+          chartContainer.appendChild(chartCanvas);
+        }
+        fetchUserStatsGraph(chartContainer);
+      });
+
+      async function fetchUserStatsTable() {
+        try {
+          const response = await fetch("/api/user-stats-table");
+          const data = await response.json();
+
+          new gridjs.Grid({
+            columns: [
+              {
+                name: "IID",
+                formatter: (cell) =>
+                  gridjs.html(
+                    `<a href="https://stake.bet/fr?iid=sport%3A${cell.replace(
+                      "sport:",
+                      ""
+                    )}&modal=bet" target="_blank">${cell}</a>`
+                  ),
+              },
+              "Created At",
+              "Followed User",
+              "Amount",
+              "Currency",
+              "Odds",
+              "Status",
+            ],
+            data: data.map((item) => [
+              item.iid,
+              item.createdAt,
+              item.followed_user,
+              item.amount,
+              item.currency,
+              item.odds,
+              item.status,
+            ]),
+            search: true,
+            pagination: {
+              limit: 15,
+              summary: false,
+            },
+            sort: true,
+            style: {
+              table: {
+                width: "100%",
+                "border-collapse": "collapse",
+              },
+              td: {
+                background: "#3a3a3a",
+                color: "#ecf0f1",
+                padding: "8px",
+                border: "1px solid #5dade2",
+              },
+              th: {
+                "background-color": "#5dade2",
+                color: "#ececec",
+                padding: "8px",
+                border: "1px solid #5dade2",
+                "text-align": "left",
+              },
+            },
+          }).render(document.querySelector(".statsContent-content"));
+        } catch (error) {
+          console.error("Erreur:", error);
+        }
+      }
+
+      function fetchUserStatsGraph(chartContainer) {
+        fetch("/api/user-stats-graph", { credentials: "include" })
+          .then((response) => {
+            if (!response.ok) {
+              if (response.status === 404) {
+                return response.json().then((data) => {
+                  throw new Error(data.message);
+                });
+              }
+              throw new Error("Une erreur s'est produite lors de la récupération des données");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            createChartuser(chartContainer.firstChild, data);
+            chartContainer.style.display = "block";
+          })
+          .catch((error) => {
+            showNotification(error.message, "error"); // Afficher une notification à l'utilisateur
+          });
+      }
+
+      function createChartuser(chartCanvas, data) {
+        const dates = data.map((item) => item.date);
+        const dailyProfits = data.map((item) => item.dailyProfit);
+        const maxBetAmounts = data.map((item) => item.maxBetAmount);
+        const cumulativeProfits = data.map((item) => item.cumulativeProfit);
+        const dailyROIs = data.map((item) => item.dailyROI);
+        const cumulativeROIs = data.map((item) => item.cumulativeROI);
+
+        const ctx = chartCanvas.getContext("2d");
+
+        if (chartInstances && chartInstances["userStats"]) {
+          chartInstances["userStats"].destroy();
+        }
+
+        chartInstances["userStats"] = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: dates,
+            datasets: [
+              {
+                label: "Daily Profit",
+                data: dailyProfits,
+                borderColor: "#58d68d",
+                backgroundColor: "rgba(88, 214, 141, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Max Bet Amount",
+                data: maxBetAmounts,
+                borderColor: "#5dade2",
+                backgroundColor: "rgba(93, 173, 226, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Cumulative Profit",
+                data: cumulativeProfits,
+                borderColor: "#f5b041",
+                backgroundColor: "rgba(245, 176, 65, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Daily ROI",
+                data: dailyROIs,
+                borderColor: "#ff393a",
+                backgroundColor: "rgba(255, 57, 58, 0.5)",
+                yAxisID: "y1",
+              },
+              {
+                label: "Cumulative ROI",
+                data: cumulativeROIs,
+                borderColor: "#8e44ad",
+                backgroundColor: "rgba(142, 68, 173, 0.5)",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            responsive: true, // Rendre le graphique responsive
+            maintainAspectRatio: false, // Si vous souhaitez que la hauteur du graphique s'adapte également
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                grid: {
+                  drawOnChartArea: false, // Définir à 'false' pour afficher uniquement la grille de l'axe y de gauche
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function formatNumber(num) {
+        const number = Number(num);
+        return number % 1 === 0 ? number.toString() : number.toFixed(2);
+      }
+
+      function createStatItem(statName, value, unit = "", isUnitAfter = false) {
+        const formattedValue = formatNumber(value);
+        return `<div class="stat-item">${statName}: ${isUnitAfter ? formattedValue + unit : unit + formattedValue}</div>`;
+      }
+
+      function createAutoBetItem(label, value, isBoolean = false) {
+        return `<div class="stat-item">${label}: ${isBoolean ? (value ? "YES" : "NO") : value}</div>`;
+      }
+
+      function fetchUserStats() {
+        fetch("/api/user-stats", { credentials: "include" })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Problème lors de la récupération des statistiques");
+            }
+            return response.json();
+          })
+          .then(([stats]) => {
+            const userDiv = document.getElementById("username");
+            userDiv.textContent = stats.user;
+
+            const statItems = [
+              createStatItem("Total Bets", stats.total_bets),
+              createStatItem("Wins", stats.wins),
+              createStatItem("Losses", stats.losses),
+              createStatItem("Win/Loss Ratio", stats.win_loss_ratio),
+              createStatItem("Profit", stats.profit, "$"),
+              createStatItem("AVG Odds", stats.avg_potential_multiplier, "x"),
+              createStatItem("AVG Bet", stats.avg_bet_amount, "$"),
+              createStatItem("ROI", stats.roi, "%", true),
+            ];
+
+            const content = "<span>" + statItems.join("") + "</span>";
+            document.getElementById("userStats").innerHTML = content;
+            document.getElementById("userStats2").innerHTML = content;
+            document.getElementById("userStats3").innerHTML = content;
+            document.getElementById("userStats4").innerHTML = content;
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+      }
+
+      function showUserStats(username, type) {
+        const userBoxId = type === "followed" ? `followed-user-${username}` : `top20-user-${username}`;
+        const userBox = document.getElementById(userBoxId);
+        const statsContainer = userBox.querySelector(".user-stats-container");
+
+        if (statsContainer.style.display === "block") {
+          statsContainer.style.display = "none";
+          return;
+        } else {
+          statsContainer.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+          statsContainer.style.display = "block";
+        }
+
+        // Vérifier si les statistiques de l'utilisateur sont déjà en cache
+        if (followedUserStatsCache[username]) {
+          displayStats(username, followedUserStatsCache[username], userBoxId);
+          return;
+        }
+
+        // Si les statistiques ne sont pas en cache, les récupérer depuis le serveur
+        fetch(`/api/user-stats/${username}`, { credentials: "include" })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Problème lors de la récupération des statistiques de l'utilisateur");
+            }
+            return response.json();
+          })
+          .then((userStats) => {
+            // Stocker les statistiques dans le cache pour une utilisation ultérieure
+            followedUserStatsCache[username] = userStats;
+            displayStats(username, userStats, userBoxId);
+          })
+          .catch((error) => {
+            console.error("Erreur lors de l'affichage des statistiques pour " + username + ": ", error);
+            statsContainer.innerHTML = "<p>Erreur lors du chargement des données.</p>";
+          });
+      }
+
+      function displayStats(username, userStats, userBoxId) {
+        const userBox = document.getElementById(userBoxId);
+        const statsContainer = userBox.querySelector(".user-stats-container");
+        const autobetSettingsContainer = userBox.querySelector(".autobet-settings-container");
+        const editSettingsContainer = userBox.querySelector(".edit-settings-container");
+
+        if (autobetSettingsContainer) {
+          autobetSettingsContainer.style.display = "none";
+        }
+
+        if (editSettingsContainer) {
+          editSettingsContainer.style.display = "none";
+        }
+
+        const statItems = [
+          createStatItem("Total Bets", userStats.total_bets),
+          createStatItem("Wins", userStats.wins),
+          createStatItem("Losses", userStats.losses),
+          createStatItem("Win/Loss Ratio", userStats.win_loss_ratio),
+          createStatItem("Profit", userStats.profit, "$"),
+          createStatItem("AVG Odds", userStats.avg_potential_multiplier, "x"),
+          createStatItem("AVG Bet", userStats.avg_bet_amount, "$"),
+          createStatItem("ROI", userStats.roi, "%", true),
+        ].join("");
+
+        statsContainer.innerHTML = statItems;
+      }
+
+      function editAutoBetSettings(username) {
+        fetch(`/api/autobet-settings/${username}`, { credentials: "include" })
+          .then((response) => response.json())
+          .then((autobetSettings) => {
+            const formHtml = `
+                    <form id="autobetForm" class="autobetForm" data-username="${username}">
+                    <label for="betAmount">Bet Amount:</label>
+                    <input type="text" id="betAmount" name="betAmount" value="${autobetSettings.bet_amount}">
+
+                    <div class="checkbox-group">
+                      <label for="variableBet">Variable Bet:</label>
+                      <input type="checkbox" id="variableBet" name="variableBet" ${autobetSettings.variable_bet ? "checked" : ""}>
+                    </div>
+
+                    <label for="maxBetAmount">Max Bet Amount:</label>
+                    <input type="text" id="maxBetAmount" name="maxBetAmount" value="${autobetSettings.max_bet_amount}">
+
+                    <label for="currency">Currency:</label>
+                    <select id="currency" name="currency">
+                      <option value="eth" ${autobetSettings.currency === "eth" ? "selected" : ""}>ETH</option>
+                      <option value="btc" ${autobetSettings.currency === "btc" ? "selected" : ""}>BTC</option>
+                      <option value="ltc" ${autobetSettings.currency === "ltc" ? "selected" : ""}>LTC</option>
+                      <option value="doge" ${autobetSettings.currency === "doge" ? "selected" : ""}>DOGE</option>
+                      <option value="xrp" ${autobetSettings.currency === "xrp" ? "selected" : ""}>XRP</option>
+                      <option value="trx" ${autobetSettings.currency === "trx" ? "selected" : ""}>TRX</option>
+                      <option value="eos" ${autobetSettings.currency === "eos" ? "selected" : ""}>EOS</option>
+                      <option value="bnb" ${autobetSettings.currency === "bnb" ? "selected" : ""}>BNB</option>
+                      <option value="ape" ${autobetSettings.currency === "ape" ? "selected" : ""}>APE</option>
+                      <option value="busd" ${autobetSettings.currency === "busd" ? "selected" : ""}>BUSD</option>
+                      <option value="usdc" ${autobetSettings.currency === "usdc" ? "selected" : ""}>USDC</option>
+                      <option value="usdt" ${autobetSettings.currency === "usdt" ? "selected" : ""}>USDT</option>
+                    </select>
+
+                    <div class="checkbox-group">
+                      <label for="autoBetActive">Auto Bet Active:</label>
+                      <input type="checkbox" id="autoBetActive" name="autoBetActive" ${
+                        autobetSettings.auto_bet_active ? "checked" : ""
+                      }>
+                    </div>
+
+                    <button type="submit"><span>Save Changes</span></button>
+                  </form>
+                  `;
+
+            // Affichez le formulaire dans la page
+            const userBox = document.querySelector(`.user-box[data-username='${username}']`);
+            const statsContainer = userBox.querySelector(".user-stats-container");
+            const autobetSettingsContainer = userBox.querySelector(".autobet-settings-container");
+            const editSettingsContainer = userBox.querySelector(".edit-settings-container");
+
+            if (statsContainer) {
+              statsContainer.style.display = "none";
+            }
+
+            if (autobetSettingsContainer) {
+              autobetSettingsContainer.style.display = "none";
+            }
+
+            if (editSettingsContainer.style.display === "block") {
+              editSettingsContainer.style.display = "none";
+            } else {
+              editSettingsContainer.innerHTML = formHtml;
+              editSettingsContainer.style.display = "block";
+            }
+
+            // Ajoutez un écouteur d'événement pour gérer la soumission du formulaire
+            const form = userBox.querySelector(`.autobetForm[data-username='${username}']`);
+            form.addEventListener("submit", function (event) {
+              event.preventDefault();
+              // Récupérez les valeurs du formulaire
+              const betAmount = form.querySelector("#betAmount").value;
+              const variableBet = form.querySelector("#variableBet").checked;
+              const maxBetAmount = form.querySelector("#maxBetAmount").value;
+              const currency = form.querySelector("#currency").value;
+              const autoBetActive = form.querySelector("#autoBetActive").checked;
+
+              // Envoyez les valeurs modifiées au serveur
+              fetch(`/api/update-autobet-settings/${username}`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  bet_amount: betAmount,
+                  variable_bet: variableBet,
+                  max_bet_amount: maxBetAmount,
+                  currency: currency,
+                  auto_bet_active: autoBetActive,
+                }),
+                credentials: "include",
+              })
+                .then((response) => {
+                  if (!response.ok) {
+                    throw new Error("Failed to update settings");
+                  }
+                  return response.json();
+                })
+                .then((updatedSettings) => {
+                  //alert("Settings have been successfully updated.");
+                  showNotification("Settings have been successfully updated.");
+                  fetchFollowedUsers();
+                })
+                .catch((error) => {
+                  console.error("Error updating settings:", error);
+                });
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching settings:", error);
+          });
+      }
+
+      function toggleDisplay(element, displayStyle) {
+        if (element) {
+          element.style.display = displayStyle;
+        }
+      }
+
+      function showChart(username) {
+        const userBox = document.querySelector(`.user-box[data-username='${username}']`);
+        const statsContainer = userBox.querySelector(".user-stats-container");
+        const autobetSettingsContainer = userBox.querySelector(".autobet-settings-container");
+        const editSettingsContainer = userBox.querySelector(".edit-settings-container");
+        let toggleFullscreenButton = userBox.querySelector(".toggle-fullscreen-button");
+
+        toggleDisplay(statsContainer, "none");
+        toggleDisplay(editSettingsContainer, "none");
+
+        if (autobetSettingsContainer.style.display === "block") {
+          toggleDisplay(autobetSettingsContainer, "none");
+          toggleDisplay(toggleFullscreenButton, "none");
+          return;
+        }
+
+        // Vérifier si le canvas existe déjà
+        let canvas = autobetSettingsContainer.querySelector("canvas");
+        if (!canvas) {
+          canvas = document.createElement("canvas");
+          autobetSettingsContainer.appendChild(canvas);
+        }
+
+        fetchChartDataAndCreateChart(username, autobetSettingsContainer, toggleFullscreenButton);
+      }
+
+      function fetchChartDataAndCreateChart(username, container, toggleButton) {
+        fetch(`/api/user-daily-stats/${username}`, { credentials: "include" })
+          .then((response) => response.json())
+          .then((data) => {
+            createChart(username, container.firstChild, data);
+            container.style.display = "block";
+            manageFullscreenToggle(username, container.firstChild, data, toggleButton);
+          })
+          .catch((error) => console.error("Erreur lors du chargement du graphique pour " + username + ": ", error));
+      }
+
+      function manageFullscreenToggle(username, canvas, chartData, toggleButton) {
+        if (!toggleButton) {
+          toggleButton = document.createElement("button");
+          toggleButton.classList.add("toggle-fullscreen-button");
+          const icon = document.createElement("i");
+          icon.classList.add("fa-solid", "fa-up-right-and-down-left-from-center");
+          toggleButton.appendChild(icon);
+
+          toggleButton.addEventListener("click", () => toggleFullscreen(username, canvas, chartData));
+          canvas.parentElement.appendChild(toggleButton);
+        } else {
+          toggleButton.style.display = "block";
+        }
+      }
+
+      function toggleFullscreen(username, canvas, chartData) {
+        const userBox = document.querySelector(`.user-box[data-username='${username}']`);
+        const isFullscreen = userBox.classList.toggle("fullscreen-user-box");
+        document.querySelectorAll(".user-box").forEach((box) => {
+          if (box !== userBox) {
+            box.classList.remove("fullscreen-user-box");
+          }
+        });
+
+        createChart(username, canvas, chartData);
+      }
+
+      function createChart(username, canvas, data) {
+        const dates = data.map((item) => item.date);
+        const dailyProfits = data.map((item) => item.daily_profit);
+        const maxBetAmounts = data.map((item) => item.max_bet_amount);
+        const cumulativeProfits = data.map((item) => item.cumulative_profit);
+        const dailyROIs = data.map((item) => item.daily_roi);
+        const cumulativeROIs = data.map((item) => item.cumulative_roi);
+
+        const ctx = canvas.getContext("2d");
+        if (chartInstances[username]) {
+          chartInstances[username].destroy();
+        }
+
+        chartInstances[username] = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: dates,
+            datasets: [
+              {
+                label: "Daily Profit",
+                data: dailyProfits,
+                borderColor: "#58d68d",
+                backgroundColor: "rgba(88, 214, 141, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Risk",
+                data: maxBetAmounts,
+                borderColor: "#5dade2",
+                backgroundColor: "rgba(93, 173, 226, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Cumulative Profit",
+                data: cumulativeProfits,
+                borderColor: "#f5b041",
+                backgroundColor: "rgba(245, 176, 65, 0.5)",
+                yAxisID: "y",
+              },
+              {
+                label: "Daily ROI",
+                data: dailyROIs,
+                borderColor: "#ff393a",
+                backgroundColor: "rgba(255, 57, 58, 0.5)",
+                yAxisID: "y1",
+              },
+              {
+                label: "Cumulative ROI",
+                data: cumulativeROIs,
+                borderColor: "#8e44ad",
+                backgroundColor: "rgba(142, 68, 173, 0.5)",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                grid: {
+                  drawOnChartArea: true,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function fetchFollowedUsers() {
+        fetch("/api/followed-users", {
+          credentials: "include",
+        })
+          .then((response) => response.json())
+          .then((followedUsers) => {
+            const container = document.getElementById("followedUsers");
+            container.innerHTML = "";
+            followedUsers.forEach((user) => {
+              const userBox = document.createElement("div");
+              userBox.classList.add("user-box");
+              userBox.id = `followed-user-${user.followed_username}`;
+              userBox.setAttribute("data-username", user.followed_username);
+              userBox.innerHTML = `
+                    <div class="topbot">
+                      <div class="username">${user.followed_username}</div>
+                      <button class="delete-btn" onclick="areyousure('${user.followed_username}')">×</button>
+                    </div>
+                    <div class="button-container">
+                      <button class="stats-btn" onclick="showUserStats('${user.followed_username}', 'followed')">Stats</button>
+                      <button class="autobet-btn" onclick="editAutoBetSettings('${user.followed_username}')">Autobet</button>
+                      <button class="edit-autobet-btn" onclick="showChart('${user.followed_username}')">
+                        <i class="fa-solid fa-chart-simple"></i>
+                      </button>
+                    </div>
+                    <div class="user-stats-container"></div>
+                    <div class="autobet-settings-container"></div>
+                    <div class="edit-settings-container"></div>
+                    `;
+              container.appendChild(userBox);
+            });
+          })
+          .catch((error) => {
+            console.error("Erreur lors de la récupération des utilisateurs suivis:", error);
+          });
+      }
+
+      function fetchTop20Users() {
+        fetch("/api/top20-users", { credentials: "include" })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Problem fetching top 20 users");
+            }
+            return response.json();
+          })
+          .then((top20Users) => {
+            const container = document.getElementById("top20Users");
+            container.innerHTML = "";
+            top20Users.forEach((user, index) => {
+              const userBox = document.createElement("div");
+              userBox.classList.add("user-box");
+              userBox.id = `top20-user-${user.USER}`;
+              userBox.setAttribute("data-username", user.USER);
+              userBox.innerHTML = `
+                <div class="username">${user.USER}</div>
+                <div class="button-container">
+                <button class="stats-btn" onclick="toggleUserStats('${user.USER}', 'top20')">Stats</button>
+                </div>
+                <div class="user-stats-container" style="display: none;">
+                  Total Bets: ${user.TOTAL_BETS}<br>
+                  Wins: ${user.WINS}<br>
+                  Losses: ${user.LOSSES}<br>
+                  Win/Loss Ratio: ${user.RATIO}<br>
+                  Profit: ${user.PROFIT}<br>
+                  AVG Odds: ${parseFloat(user.AVG_MULTI).toFixed(2)}<br>
+                  AVG Bet: ${parseFloat(user.AVG_AMOUNT).toFixed(2)}<br>
+                  ROI: ${user.ROI}%<br>
+                  AVG Bets/Day: ${user.AVG_DAY}
+                </div>
+              `;
+              container.appendChild(userBox);
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching top 20 users:", error);
+          });
+      }
+
+      function toggleUserStats(username) {
+        const userBox = document.getElementById(`top20-user-${username}`);
+        const statsContainer = userBox.querySelector(".user-stats-container");
+        statsContainer.style.display = statsContainer.style.display === "none" ? "block" : "none";
+      }
+
+      function showNotification(message) {
+        const notificationContainer = document.getElementById("notificationContainer");
+        notificationContainer.textContent = message;
+
+        notificationContainer.classList.add("active");
+
+        setTimeout(() => {
+          notificationContainer.classList.remove("active");
+        }, 3000);
+      }
+
+      function areyousure(username) {
+        var modalContent = document.querySelector("#confirmationModal .modal-content p");
+        modalContent.textContent = `Do you really want to stop following ${username} ?`;
+
+        // Get the button and reset its properties for the confirmation action
+        const confirmButton = document.getElementById("confirmYes");
+        confirmButton.textContent = "YES"; // Set the text back to "Yes"
+        confirmButton.style.backgroundColor = "#ff7675"; // Set the color back to red
+        confirmButton.onmouseover = function () {
+          this.style.backgroundColor = "#d63031"; // Darker red for hover state
+        };
+        confirmButton.onmouseout = function () {
+          this.style.backgroundColor = "#ff7675"; // Original red color
+        };
+
+        confirmButton.onclick = function () {
+          confirmYes();
+        };
+
+        // Set the current user to be unfollowed if confirmed
+        window.currentUsername = username;
+        document.getElementById("confirmationModal").style.display = "block";
+      }
+
+      function confirmYes() {
+        fetch(`/api/unfollow-user/${window.currentUsername}`, {
+          method: "DELETE",
+          credentials: "include",
+        })
+          .then((response) => {
+            if (response.ok) {
+              showNotification(`User ${window.currentUsername} successfully deleted.`);
+              fetchFollowedUsers();
+            } else {
+              showNotification("Error when deleting user.");
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+        closeModal();
+      }
+
+      function closeModal() {
+        document.getElementById("confirmationModal").style.display = "none";
+      }
+
+      function logout() {
+        fetch("/api/logout", {
+          method: "POST",
+          credentials: "include",
+        })
+          .then((response) => {
+            if (response.ok) {
+              window.location.href = "index.html";
+            } else {
+              throw new Error("Problème de déconnexion du serveur");
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+      }
+
+      function toggleSearchBar() {
+        var searchBar = document.getElementById("search-bar");
+        searchBar.style.display = searchBar.style.display === "none" ? "block" : "none";
+        if (searchBar.style.display === "block") {
+          document.getElementById("user-search").focus(); // Focus on the search bar when it appears
+        }
+      }
+
+      function searchUser(searchTerm) {
+        fetch(`/api/search-users/${searchTerm}`, {
+          method: "GET",
+          credentials: "include",
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            displaySearchResults(data);
+          })
+          .catch((error) => {
+            console.error("Error during fetch operation:", error);
+          });
+      }
+
+      function displaySearchResults(users) {
+        const searchResultsDiv = document.getElementById("search-results");
+        searchResultsDiv.innerHTML = "";
+
+        users.forEach((user) => {
+          const userDiv = document.createElement("div");
+          userDiv.textContent = user.user;
+          userDiv.classList.add("dropdown-item");
+          userDiv.onclick = function () {
+            toggleSearchBar();
+            showUserStatsModal(user.user);
+          };
+          searchResultsDiv.appendChild(userDiv);
+        });
+
+        if (users.length > 0) {
+          searchResultsDiv.style.display = "block";
+        } else {
+          searchResultsDiv.style.display = "none";
+        }
+      }
+
+      function showUserStatsModal(username) {
+        fetch(`/api/user-stats/${username}`, { credentials: "include" })
+          .then((response) => response.json())
+          .then((userStats) => {
+            const statsHTML = formatStatsForModal(userStats);
+            displayModalWithContent(username, statsHTML);
+          })
+          .catch((error) => {
+            console.error("Error fetching stats for " + username, error);
+          });
+      }
+
+      function displayModalWithContent(username, statsHTML) {
+        const modal = document.getElementById("confirmationModal");
+        const modalContent = modal.querySelector(".modal-content p");
+        modalContent.innerHTML = `<h2>${username}:</h2><br>${statsHTML}`;
+
+        const confirmButton = modal.querySelector("#confirmYes");
+        confirmButton.textContent = "Follow";
+
+        confirmButton.style.backgroundColor = "#2ecc71"; // emerald green
+        confirmButton.onmouseover = function () {
+          this.style.backgroundColor = "#27ae60"; // nephritis green
+        };
+        confirmButton.onmouseout = function () {
+          this.style.backgroundColor = "#2ecc71"; // emerald green
+        };
+
+        confirmButton.onclick = function () {
+          followUser(username);
+        };
+
+        modal.style.display = "block";
+      }
+
+      function formatStatsForModal(userStats) {
+        return `
+              <div>Total Bets: ${userStats.total_bets}</div>
+              <div>Wins: ${userStats.wins}</div>
+              <div>Losses: ${userStats.losses}</div>
+              <div>Win/Loss Ratio: ${userStats.win_loss_ratio}</div>
+              <div>Profit: $${userStats.profit}</div>
+              <div>AVG Odds: ${parseFloat(userStats.avg_potential_multiplier).toFixed(2)}x</div>
+              <div>AVG Bet: $${parseFloat(userStats.avg_bet_amount).toFixed(2)}</div>
+              <div>ROI: ${userStats.roi}%</div>
+              `;
+      }
+
+      function followUser(username) {
+        fetch(`/api/follow-user/${username}`, {
+          method: "POST",
+          credentials: "include",
+        })
+          .then((response) => response.json()) // Convertir la réponse en JSON
+          .then((data) => {
+            if (data.message === "User followed successfully") {
+              showNotification(`Successfully started following ${username}.`);
+              fetchFollowedUsers();
+            } else if (data.message === "User is already being followed") {
+              showNotification(`${username} is already being followed.`);
+            } else {
+              showNotification(`Error following ${username}.`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+        closeModal();
+      }
+
+      function showEditApiKeyModal() {
+        var modalContent = document.querySelector("#confirmationModal .modal-content p");
+        modalContent.textContent = `Enter your new API key :`;
+
+        const confirmButton = document.getElementById("confirmYes");
+        confirmButton.textContent = "Edit"; // Set the text back to "Yes"
+        confirmButton.style.backgroundColor = "#ff7675";
+
+        confirmButton.onmouseover = function () {
+          this.style.backgroundColor = "#d63031"; // Darker red for hover state
+        };
+        confirmButton.onmouseout = function () {
+          this.style.backgroundColor = "#ff7675"; // Original red color
+        };
+
+        confirmButton.onclick = function () {
+          submitNewApiKey();
+        };
+
+        // Modifier le contenu de la modale
+        modalContent.innerHTML = `
+          <p>Enter your new API key :</p>
+          <input type="password" id="newApiKey" placeholder="Nouvelle clé API" class="custom-input">
+        `;
+
+        // Afficher la modale
+        document.getElementById("confirmationModal").style.display = "block";
+      }
+
+      function submitNewApiKey() {
+        const newApiKey = document.getElementById("newApiKey").value;
+        if (!newApiKey) {
+          alert("Please enter an API key.");
+          return;
+        }
+
+        fetch("/api/change-api-key", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ newApiKey: newApiKey }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message === "Clé API modifiée avec succès") {
+              showNotification("API key successfully updated.");
+              closeModal();
+            } else {
+              showNotification("Error updating API key.");
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+      }
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/worker.js").catch((err) => {
+          console.log("Échec de l'enregistrement du Service Worker:", err);
+        });
+      }
+
+      function showModal() {
+        document.getElementById("notification-modal").style.display = "block";
+
+        document.getElementById("modal-yes").addEventListener("click", function () {
+          onModalYesClicked();
+          document.getElementById("notification-modal").style.display = "none";
+        });
+
+        document.getElementById("modal-no").addEventListener("click", function () {
+          onModalNoClicked();
+          document.getElementById("notification-modal").style.display = "none";
+        });
+      }
+
+      function onModalYesClicked() {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            subscribeUserToNotifications();
+          }
+        });
+      }
+
+      function subscribeUserToNotifications() {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.pushManager
+            .subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: "BJNGFU4JH0A6yHmETP7Y2yg5lt_CGaX3VsRtGwzbQS-J2NJjGTwbPoLCV3rHgRWpCI8qzcFUcXDdu4HDOtQlkao",
+            })
+            .then((subscription) => {
+              fetch("/api/subscribe", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(subscription),
+              });
+            })
+            .catch((err) => {
+              console.error("Échec de l’inscription aux notifications push:", err);
+            });
+        });
+      }
+
+      function onModalNoClicked() {
+        localStorage.setItem("notificationsDenied", "true");
+      }
+
+      window.onload = adjustStatsScrollWidth;
+      window.onresize = adjustStatsScrollWidth;
+
+      window.onload = function () {
+        fetchUserStats();
+        fetchFollowedUsers();
+        fetchTop20Users();
+        const notificationsDenied = localStorage.getItem("notificationsDenied");
+        if (Notification.permission !== "granted" && notificationsDenied !== "true") {
+          showModal();
+        }
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="ios.png" />
+    <meta name="apple-mobile-web-app-title" content="Stake Sport Bot" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="icon" href="web.ico" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+
+    <title>Stake Sport Bot</title>
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        font-family: "Open Sans", sans-serif;
+        background: linear-gradient(225deg, #032127 0%, #3f3251 100%);
+      }
+
+      .login-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 340px;
+      }
+
+      .login-container h2 {
+        font-size: 24px;
+        color: #ecf0f1;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+
+      .input-container {
+        position: relative;
+        width: 100%;
+      }
+
+      .api-input {
+        width: 100%;
+        padding: 10px 40px 10px 10px;
+        margin: 0;
+        margin-left: -30px;
+        border-radius: 5px;
+        background-color: #ffffff;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 400;
+        border: none;
+        outline: none;
+      }
+
+      .submit-btn {
+        position: absolute;
+        right: -15px;
+        top: 4px;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #2c3e50;
+        color: white;
+        cursor: pointer;
+        border: none;
+      }
+
+      .submit-btn i {
+        line-height: 30px;
+      }
+
+      .submit-btn:hover {
+        background-color: #3d5565;
+      }
+
+      #modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+      }
+
+      #additional-form {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 400px;
+        z-index: 2;
+      }
+
+      #additional-form input[type="text"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd; /* Couleur de la bordure */
+        border-radius: 5px;
+        font-family: "Open Sans", sans-serif;
+      }
+      #additional-form input[type="password"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd; /* Couleur de la bordure */
+        border-radius: 5px;
+        font-family: "Open Sans", sans-serif;
+      }
+
+      #additional-form button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #2c3e50;
+        color: white;
+        cursor: pointer;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+      }
+
+      #additional-form button:hover {
+        background-color: #3d5565;
+      }
+
+      #subscribe-modal {
+        /* Même style que #additional-form */
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 300px;
+        z-index: 2;
+      }
+
+      /* Styles pour le bouton Go */
+      #subscribe-modal button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #2c3e50;
+        color: white;
+        cursor: pointer;
+        font-family: "Open Sans", sans-serif;
+        font-weight: 600;
+      }
+
+      #subscribe-modal button:hover {
+        background-color: #3d5565;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>STAKE SPORT BOT</h2>
+
+      <div id="telegram-button" style="margin-top: 15px"></div>
+      <script
+        async
+        src="https://telegram.org/js/telegram-widget.js?22"
+        data-telegram-login="StakeSportAutoBetBot"
+        data-size="large"
+        data-onauth="onTelegramAuth(user)"
+        data-request-access="write"
+      ></script>
+    </div>
+
+    <div id="modal-overlay" style="display: none"></div>
+
+    <div id="additional-form" style="display: none">
+      <h3>Please enter your stake username and api</h3>
+      <input type="text" id="stakeUsername" placeholder="Enter your Stake Username" />
+      <input type="password" id="apiKey" placeholder="Enter your API Key" />
+      <button onclick="submitAdditionalInfo()">Submit</button>
+    </div>
+
+    <div id="subscribe-modal" style="display: none">
+      <h3>Please subscribe to the telegram channel</h3>
+      <button onclick="redirectToTelegram()">Go</button>
+    </div>
+
+    <script>
+      let globalTelegramId = null;
+      function onTelegramAuth(user) {
+        globalTelegramId = user.id;
+        fetch("/api/authentifier-telegram", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ telegramId: user.id }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message === "Authentification réussie") {
+              window.location.href = "user-dashboard.html";
+            } else if (data.message === "Veuillez vous abonner au channel VIP") {
+              document.getElementById("modal-overlay").style.display = "block";
+              document.getElementById("subscribe-modal").style.display = "block";
+            } else if (data.message === "Veuillez fournir votre clé API et votre nom d'utilisateur Stake") {
+              document.getElementById("modal-overlay").style.display = "block";
+              document.getElementById("additional-form").style.display = "block";
+            } else {
+              alert("Échec de la connexion");
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+      }
+
+      function submitAdditionalInfo() {
+        const apiKey = document.getElementById("apiKey").value;
+        const stakeUsername = document.getElementById("stakeUsername").value;
+        const telegramId = globalTelegramId;
+
+        fetch("/api/enregistrer-utilisateur", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ telegramId: telegramId, apiKey: apiKey, stakeUsername: stakeUsername }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message === "Enregistrement réussi") {
+              window.location.href = "user-dashboard.html";
+            } else {
+              alert("Échec de l'enregistrement");
+            }
+          })
+          .catch((error) => {
+            console.error("Erreur:", error);
+          });
+      }
+
+      function redirectToTelegram() {
+        window.location.href = "https://t.me/OxaPayCHGBot?start=qVWWsGw";
+      }
+    </script>
+  </body>
+</html>
