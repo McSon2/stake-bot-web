@@ -2,7 +2,7 @@
 
 ![Landing Page](img/1.png "Landing Page")
 
-[English](README.md)
+[French](README.md)
 
 ## Introduction
 
